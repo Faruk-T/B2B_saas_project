@@ -1,0 +1,51 @@
+name: Daily Task
+description: Single day implementation task from the playbook
+title: "[P-N S-M] "
+labels: ["phase-1"]
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - "Phase 1 — Foundation & Tenancy"
+        - "Phase 2 — Core Domain & Catalog"
+        - "Phase 3 — Async & Integrations"
+        - "Phase 4 — Flutter Client"
+    validations:
+      required: true
+  - type: input
+    id: section
+    attributes:
+      label: Section
+      description: "e.g. 1.1, 2.3"
+    validations:
+      required: true
+  - type: input
+    id: day
+    attributes:
+      label: Day number
+      description: "e.g. D1, D26"
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What must be true at end of day?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Copy from playbook — checklist items
+    validations:
+      required: true
+  - type: input
+    id: branch
+    attributes:
+      label: Branch name
+      description: "e.g. phase-1/section-1-docker-dev-environment"
+    validations:
+      required: true
