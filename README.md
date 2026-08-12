@@ -185,7 +185,8 @@ b2b/
 | [Database Schema](docs/database-schema.md) | Tablo tanımları |
 | [API Contract](docs/api-contract.md) | Endpoint'ler + JSON örnekleri |
 | [GitHub Roadmap](docs/github-roadmap.md) | 20 issue, 4 milestone |
-| [GitHub Setup](docs/github-setup.md) | Repo bağlama rehberi |
+| [GitHub Setup](docs/github-setup.md) | Repo bağlama + branch kuralları |
+| [GitHub Project Setup](docs/github-project-setup.md) | Labels, milestones, Kanban, onay akışı |
 
 ---
 

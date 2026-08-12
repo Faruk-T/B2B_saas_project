@@ -12,8 +12,19 @@ This guide connects your local project to the GitHub repository and sets up mile
 | ✅ Do | ❌ Don't |
 |-------|----------|
 | Her gün yeni branch aç | `main`'e direkt push |
-| Branch'e push et | `git branch -M main` (gün branch'ini main yapma) |
-| PR aç → review → merge | Gün bitmeden main'e merge etme (PR ile) |
+| Branch'e push et + PR aç | Merge etme (Ümit merge eder) |
+| 2 collaborator onayı bekle | Onaysız yeni güne geçme |
+| Playbook'taki TÜM görevleri bitir | Eksik bırakıp PR açma |
+
+### Onay akışı
+
+```
+Faruk → PR açar
+Collaborator 1 + 2 → Approve (2 onay)
+Ümit Bey → Merge
+```
+
+Detaylı GitHub kurulum (labels, milestones, 20 issue, Kanban): **[github-project-setup.md](github-project-setup.md)**
 
 ---
 
