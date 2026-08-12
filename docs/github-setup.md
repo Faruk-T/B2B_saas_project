@@ -3,26 +3,68 @@
 This guide connects your local project to the GitHub repository and sets up milestones, labels, and branch protection.
 
 **Repository:** https://github.com/Faruk-T/B2B_saas_project  
-**Status:** Empty (ready for first push)
+**Status:** Active — daily branches, PR → `main`
 
 ---
 
-## Step 1 — First push (do this once)
+## Golden rule
 
-Run from the project root (`b2b-main/`):
+| ✅ Do | ❌ Don't |
+|-------|----------|
+| Her gün yeni branch aç | `main`'e direkt push |
+| Branch'e push et | `git branch -M main` (gün branch'ini main yapma) |
+| PR aç → review → merge | Gün bitmeden main'e merge etme (PR ile) |
+
+---
+
+## Step 1 — İlk kurulum (repo boşken, bir kez)
+
+GitHub'da boş repo oluşturduktan sonra **doğrudan gün branch'i ile başla**:
 
 ```powershell
 cd "c:\Users\user\Desktop\Trunçgil Commerce OS\b2b-main"
 
 git init
+git checkout -b phase-1/section-1-planning-and-readme
 git add .
-git commit -m "docs: add project README, implementation plan, and GitHub roadmap"
-git branch -M main
+git commit -m "docs: add 20-day roadmap and professional README with architecture diagrams"
 git remote add origin https://github.com/Faruk-T/B2B_saas_project.git
-git push -u origin main
+git push -u origin phase-1/section-1-planning-and-readme
 ```
 
-> **Rule:** After this, never push directly to `main`. Always use feature branches + Pull Requests.
+Sonra GitHub'da **Pull Request** aç: `phase-1/section-1-planning-and-readme` → `main` → Merge.
+
+> ⚠️ **`git branch -M main` kullanma** — bu komut gün branch'ini main'e çevirir ve direkt main push'a yol açar.
+
+---
+
+## Step 1b — Her gün (D2, D3, … D20)
+
+```powershell
+git checkout main
+git pull origin main
+
+git checkout -b phase-1/section-2-docker-dev-environment   # günün branch adı
+
+# ... çalış, commit ...
+git push -u origin phase-1/section-2-docker-dev-environment
+
+# GitHub → Pull Request → main → Merge
+```
+
+### 20 gün branch adları
+
+| Gün | Branch |
+|-----|--------|
+| D1 | `phase-1/section-1-planning-and-readme` |
+| D2 | `phase-1/section-2-docker-dev-environment` |
+| D3 | `phase-1/section-3-multi-database-tenancy` |
+| D4 | `phase-1/section-4-tenant-provisioning` |
+| D5 | `phase-1/section-5-quality-gates-and-root-api` |
+| D6 | `phase-2/section-1-core-schema` |
+| D7 | `phase-2/section-2-domain-layer` |
+| … | *(tam liste: [`github-roadmap.md`](github-roadmap.md))* |
+| D20 | `phase-4/section-5-excel-ui-and-release` |
 
 ---
 

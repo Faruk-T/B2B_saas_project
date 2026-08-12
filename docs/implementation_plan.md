@@ -9,11 +9,11 @@ This document is the **single source of truth** for architecture decisions and t
 
 | Related doc | Purpose |
 |-------------|---------|
-| [`github-roadmap.md`](github-roadmap.md) | 100 issue titles, labels, milestones |
+| [`github-roadmap.md`](github-roadmap.md) | 20 issue titles, 4 milestones |
 | [`github-setup.md`](github-setup.md) | First push + branch protection |
 | [`database-schema.md`](database-schema.md) | Full table definitions |
 | [`api-contract.md`](api-contract.md) | All endpoints + JSON examples |
-| [`playbooks/README.md`](playbooks/README.md) | **Ultra-detailed daily tasks (D1–D100)** |
+| [`playbooks/README.md`](playbooks/README.md) | **Daily tasks (D1–D20) — 1 section = 1 day** |
 
 ---
 
@@ -34,11 +34,11 @@ This document is the **single source of truth** for architecture decisions and t
 13. [Quality gates (SOLID, PHPStan, lints)](#13-quality-gates-solid-phpstan-lints)
 14. [Monorepo & Docker layout](#14-monorepo--docker-layout)
 15. [GitHub delivery model](#15-github-delivery-model)
-16. [Phase 1 — Foundation & Tenancy (Sections 1.1–1.5)](#16-phase-1--foundation--tenancy)
-17. [Phase 2 — Core Domain & Catalog (Sections 2.1–2.5)](#17-phase-2--core-domain--catalog)
-18. [Phase 3 — Async & Integrations (Sections 3.1–3.5)](#18-phase-3--async--integrations)
-19. [Phase 4 — Flutter Client (Sections 4.1–4.5)](#19-phase-4--flutter-client)
-20. [Definition of done (per section)](#20-definition-of-done-per-section)
+16. [Phase 1 — Foundation & Tenancy (D1–D5)](#16-phase-1--foundation--tenancy-d1d5)
+17. [Phase 2 — Core Domain & Catalog (D6–D10)](#17-phase-2--core-domain--catalog-d6d10)
+18. [Phase 3 — Async & Integrations (D11–D15)](#18-phase-3--async--integrations-d11d15)
+19. [Phase 4 — Flutter Client (D16–D20)](#19-phase-4--flutter-client-d16d20)
+20. [Definition of done (per day)](#20-definition-of-done-per-day--section)
 
 ---
 
@@ -380,7 +380,7 @@ b2b/
     ├── api-contract.md
     ├── github-roadmap.md
     ├── github-setup.md
-    └── playbooks/           ← daily D1–D100 detail
+    └── playbooks/           ← daily D1–D20 detail (1 section = 1 day)
 ```
 
 ---
@@ -402,9 +402,9 @@ b2b/
 
 1. **Never push to `main` directly** — always via PR from `phase-N/section-M-*` branch.  
 2. **Commits in English** — Conventional Commits format.  
-3. **One issue per day minimum** — link commits and PRs to GitHub issues.  
-4. **Section complete** = all 5 issues closed + PR merged + definition of done met.  
-5. **Phase complete** = all 5 sections done + milestone closed.
+3. **One issue per day** — 1 section = 1 day = 1 GitHub issue (20 total).  
+4. **Section complete** = issue closed + PR merged + acceptance criteria met.  
+5. **Phase complete** = 5 sections done + milestone closed.
 
 ### Branch & commit examples
 
@@ -420,301 +420,76 @@ git commit -m "docs(tenancy): document dual-connection config in README"
 
 ---
 
-## 16. Phase 1 — Foundation & Tenancy
+## 16. Phase 1 — Foundation & Tenancy (D1–D5)
 
-**Goal:** Runnable Docker stack, Laravel backend skeleton, working multi-DB tenancy with provisioning, quality gates, and root admin API.
+**Milestone:** M1 · **5 gün** · Playbook: [`playbooks/phase-1-detailed.md`](playbooks/phase-1-detailed.md)
 
-**Milestone:** `M1 — Foundation & Tenancy`
+| Gün | Bölüm | Konu | Kod? |
+|-----|-------|------|------|
+| **D1** | 1.1 | Detaylı plan + profesyonel README + görseller | ❌ Sadece docs |
+| D2 | 1.2 | Docker Compose (MariaDB, Redis, PHP, Nginx, Mailpit) | ✅ |
+| D3 | 1.3 | Laravel 11 + multi-DB tenancy + TenantResolverMiddleware | ✅ |
+| D4 | 1.4 | ProvisionTenantAction + migrate + seed pipeline | ✅ |
+| D5 | 1.5 | Pest/PHPStan CI + Sanctum + Root Admin API → `v0.1.0-phase1` | ✅ |
 
----
-
-### Section 1.1 — Docker & dev environment (Days 1–5)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D1** | Create monorepo folder structure (`docker/`, `apps/backend/`, `apps/frontend/`, `docs/`) | Empty scaffold committed | `chore: scaffold monorepo directory structure` |
-| **D2** | Write `docker-compose.yml` with MariaDB 11 + Redis volumes and networks | `docker compose up` starts DB + Redis | `feat(docker): add docker-compose with MariaDB 11 and Redis` |
-| **D3** | PHP 8.4-FPM Dockerfile: extensions (pdo_mysql, redis, gd), Composer, Node 20, Chromium | PHP container builds | `feat(docker): add PHP 8.4-FPM Dockerfile with Node and Chromium` |
-| **D4** | Nginx config: proxy to PHP, wildcard `*.b2b.local` or path-based alias | API reachable at `:8080` | `feat(docker): configure Nginx reverse proxy for tenant routing` |
-| **D5** | Supervisor container + Mailpit; document `make up` / README quickstart | Full stack runs locally | `feat(docker): add Supervisor worker and Mailpit services` |
-
-**Section 1.1 exit criteria:** `docker compose up -d` → all containers healthy; README quickstart verified.
+**D1 kuralı:** API, veritabanı ve Docker **uygulama kodu yok** — yalnızca dokümantasyon.
 
 ---
 
-### Section 1.2 — Multi-database tenancy architecture (Days 6–10)
+## 17. Phase 2 — Core Domain & Catalog (D6–D10)
 
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D6** | `composer create-project laravel/laravel` in `apps/backend`; wire to Docker | Laravel welcome via Nginx | `feat(backend): initialize Laravel 11 application` |
-| **D7** | System migrations: `tenants`, `tenant_domains`, `subscriptions` | `php artisan migrate` on system connection | `feat(tenancy): add system database migrations` |
-| **D8** | Configure `database.php`: `system` + `tenant` connections; env vars | Both connections testable | `feat(tenancy): configure dual database connections` |
-| **D9** | `TenantResolverMiddleware`: resolve alias from path/host, swap connection | Request hits correct tenant DB | `feat(tenancy): implement TenantResolverMiddleware` |
-| **D10** | Integration test: two tenants, prove data isolation | Pest test green | `test(tenancy): add tenant isolation integration tests` |
+**Milestone:** M2 · **5 gün** · Playbook: [`playbooks/phase-2-detailed.md`](playbooks/phase-2-detailed.md)
 
-**Section 1.2 exit criteria:** HTTP request to `/firma-a/...` uses `b2b_tenant_firma_a_db`; tenant B data invisible to tenant A.
-
----
-
-### Section 1.3 — Tenant provisioning pipeline (Days 11–15)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D11** | Domain: `Tenant`, `TenantAlias` value objects; `ProvisionTenantContract` | Pure domain classes, no Laravel imports | `feat(domain): add Tenancy value objects and contracts` |
-| **D12** | `ProvisionTenantAction`: steps ①–② (system insert + CREATE DATABASE) | Can create empty tenant DB | `feat(tenancy): implement ProvisionTenantAction steps 1-2` |
-| **D13** | Tenant migration runner: `artisan tenants:migrate {alias}` | All tenant tables created | `feat(tenancy): add tenant-specific migration runner` |
-| **D14** | `TenantBaseSeeder`: default roles, UoM, settings | Fresh tenant has usable defaults | `feat(tenancy): implement TenantBaseSeeder` |
-| **D15** | Wire full pipeline + idempotency guard (duplicate alias rejected) | End-to-end provision works | `feat(tenancy): complete provisioning pipeline with validation` |
-
-**Section 1.3 exit criteria:** Single API call creates tenant, DB, migrations, seed, domain binding.
+| Gün | Bölüm | Konu | Tag |
+|-----|-------|------|-----|
+| D6 | 2.1 | Tenant DB şeması (categories, products, stock, orders) | — |
+| D7 | 2.2 | Domain katmanı (Actions + Value Objects) | — |
+| D8 | 2.3 | Çok sektörlü motorlar (tekstil, otomotiv, FMCG, yapı) | — |
+| D9 | 2.4 | Faset filtreleme + FilterCatalogProductsAction | — |
+| D10 | 2.5 | RBAC + iskonto kademeleri + ciro motoru | `v0.2.0-phase2` |
 
 ---
 
-### Section 1.4 — Quality gates & architecture tests (Days 16–20)
+## 18. Phase 3 — Async & Integrations (D11–D15)
 
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D16** | Install Pest; add `tests/Architecture/SolidArchitectureTest.php` | Domain layer enforced | `test(architecture): add SolidArchitectureTest for Domain layer` |
-| **D17** | PHPStan Level 9 config; baseline if needed | `composer analyse` passes | `chore(quality): configure PHPStan Level 9` |
-| **D18** | Pre-commit hook script (Pest + PHPStan) | Bad commits blocked locally | `chore(quality): add pre-commit hook for tests and static analysis` |
-| **D19** | GitHub Actions: PHP 8.4, composer install, Pest, PHPStan | CI green on PR | `ci: add GitHub Actions workflow for backend quality gates` |
-| **D20** | Document all commands in README + `docs/contributing.md` snippet | Docs complete | `docs: document quality gate commands and CI workflow` |
+**Milestone:** M3 · **5 gün** · Playbook: [`playbooks/phase-3-detailed.md`](playbooks/phase-3-detailed.md)
 
-**Section 1.4 exit criteria:** PR without tests or with Domain→Laravel dependency fails CI.
-
----
-
-### Section 1.5 — API foundation & root admin skeleton (Days 21–25)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D21** | Install Sanctum; root guard on system connection | Token auth works | `feat(auth): configure Laravel Sanctum for API authentication` |
-| **D22** | `root_users` migration + login/register endpoints | Root admin can authenticate | `feat(root-admin): add root user authentication endpoints` |
-| **D23** | `GET/POST /api/root/tenants` — list, create (triggers provision) | Tenant CRUD via API | `feat(root-admin): add tenant management API endpoints` |
-| **D24** | Domain binding API: path alias + subdomain; validation rules | Domain routes correctly | `feat(root-admin): add tenant domain binding API` |
-| **D25** | Feature tests for full root admin flow; tag `v0.1.0-phase1` | Phase 1 complete | `test(root-admin): add feature tests for tenant provisioning flow` |
-
-**Section 1.5 exit criteria:** Root admin can log in, create tenant, tenant is provisioned and reachable.
+| Gün | Bölüm | Konu | Tag |
+|-----|-------|------|-----|
+| D11 | 3.1 | Redis kuyruklar + Horizon + Supervisor | — |
+| D12 | 3.2 | Ürün zenginleştirme (Puppeteer scraping) | — |
+| D13 | 3.3 | Excel import/export (önizleme + async) | — |
+| D14 | 3.4 | FCM push bildirimler | — |
+| D15 | 3.5 | Scribe/Scalar API docs + OpenAPI export | `v0.3.0-phase3` |
 
 ---
 
-## 17. Phase 2 — Core Domain & Catalog
+## 19. Phase 4 — Flutter Client (D16–D20)
 
-**Goal:** Complete tenant data model, domain actions, sector adapters, faceted search, roles, and turnover discount logic.
+**Milestone:** M4 · **5 gün** · Playbook: [`playbooks/phase-4-detailed.md`](playbooks/phase-4-detailed.md)
 
-**Milestone:** `M2 — Core Domain & Catalog`
-
----
-
-### Section 2.1 — Core database schema (Days 26–30)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D26** | `categories` migration with `path`, `depth`, indexes | Category tree CRUD ready | `feat(schema): add hierarchical categories table` |
-| **D27** | `products` + `attributes_json` + virtual columns for `brand`, `power_watt` | JSON specs storable + filterable | `feat(schema): add products table with JSON attributes` |
-| **D28** | `filterable_attributes`, `sector_profiles` config tables | Admin filter config storable | `feat(schema): add filterable attributes configuration` |
-| **D29** | `stocks`, `stock_movements`, `stock_reservations`, `warehouses` | Inventory model complete | `feat(schema): add stock and warehouse tables` |
-| **D30** | `suppliers`, `dealers`, `customer_discount_tiers`, `customer_turnover_logs`, `orders` skeleton | Commercial model complete | `feat(schema): add dealers, pricing, and order tables` |
+| Gün | Bölüm | Konu | Tag |
+|-----|-------|------|-----|
+| D16 | 4.1 | Flutter core + Dio + auth + responsive | — |
+| D17 | 4.2 | Root admin, toptancı, bayi, tedarikçi portalleri | — |
+| D18 | 4.3 | Katalog UI + dinamik filtre drawer | — |
+| D19 | 4.4 | QR stok modülü (inbound, picking, transfer) | — |
+| D20 | 4.5 | Excel UI + E2E QA + MVP release | **`v1.0.0`** |
 
 ---
 
-### Section 2.2 — Domain layer (Days 31–35)
+## 20. Definition of done (per day / section)
 
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D31** | Catalog value objects: `ProductId`, `Sku`, `Money`, `AttributesJson` | Typed domain primitives | `feat(domain): add Catalog value objects` |
-| **D32** | `UpdateProductSpecsAction` — merge JSON specs with validation | Spec updates via action | `feat(domain): implement UpdateProductSpecsAction` |
-| **D33** | `ReserveStockAction` — reserve on order, release on cancel | Stock reservation rules | `feat(domain): implement ReserveStockAction` |
-| **D34** | `UpgradeCustomerTierAction` — pure tier calculation logic | Tier logic testable without DB | `feat(domain): implement UpgradeCustomerTierAction` |
-| **D35** | Unit tests for all Phase 2 actions (mock repositories) | ≥90% domain coverage | `test(domain): add unit tests for core actions` |
+Her gün (bölüm) **tamamlanmış** sayılır ancak şunların hepsi sağlanırsa:
 
----
+- [ ] İlgili GitHub issue kapatıldı (`Closes #N` PR ile)
+- [ ] Work merged to `main` via reviewed PR
+- [ ] Commits in English (Conventional Commits)
+- [ ] Playbook'taki acceptance criteria karşılandı
+- [ ] Tests pass where applicable (D5+)
+- [ ] No secrets committed
 
-### Section 2.3 — Multi-sector engine adapters (Days 36–40)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D36** | `MatrixOrderStrategy` — 2D color×size grid validation | Textile orders validated | `feat(sector): add apparel matrix order engine` |
-| **D37** | `FitmentEngine` — vehicle make/model/year compatibility | Automotive fitment checks | `feat(sector): add automotive fitment engine` |
-| **D38** | `BatchLotDriver` — lot number, expiry enforcement | FMCG batch rules | `feat(sector): add FMCG batch and lot tracking driver` |
-| **D39** | `CalculatesByDimensionStrategy` — m²/m³/meter/kg conversions | Building materials pricing | `feat(sector): add dimension-based pricing strategy` |
-| **D40** | Sector profile seeder + tenant `sector` field on provision | Tenant activates correct engine | `feat(sector): add sector profile selection on tenant setup` |
-
----
-
-### Section 2.4 — Faceted search & dynamic filters (Days 41–45)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D41** | `FilterCatalogProductsAction` — base query + pagination | Filtered product list API | `feat(catalog): implement FilterCatalogProductsAction` |
-| **D42** | JSON facet extraction + count aggregation | Facet counts in response | `feat(catalog): add JSON facet count aggregation` |
-| **D43** | Admin CRUD for `filterable_attributes` per category | Admin configures filters | `feat(catalog): add filterable attributes admin API` |
-| **D44** | Filter types: multi-select, range, boolean; query builder | All filter types work | `feat(catalog): support multi-select, range, and boolean filters` |
-| **D45** | Meilisearch optional driver for OEM full-text; tests | OEM search fast | `feat(catalog): add optional Meilisearch OEM search index` |
-
----
-
-### Section 2.5 — Auth, roles & discount engine (Days 46–50)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D46** | Tenant user roles: `admin`, `dealer`, `supplier`, `plasiyer`; policies | RBAC enforced | `feat(auth): add tenant user roles and policies` |
-| **D47** | Discount tier CRUD + dealer assignment API | Tiers manageable | `feat(pricing): add customer discount tier management` |
-| **D48** | Order delivery event → `ProcessTurnoverJob` on `turnover` queue | Turnover recalculated async | `feat(pricing): wire turnover calculation on order delivery` |
-| **D49** | Dealer credit limit + custom price list tables and API | Dealer-specific pricing | `feat(dealers): add credit limits and custom price lists` |
-| **D50** | Tier upgrade integration tests; tag `v0.2.0-phase2` | Phase 2 complete | `test(pricing): add tier upgrade scenario tests` |
-
----
-
-## 18. Phase 3 — Async & Integrations
-
-**Goal:** Production-grade background processing, scraping, Excel, notifications, and published API docs.
-
-**Milestone:** `M3 — Async & Integrations`
-
----
-
-### Section 3.1 — Redis queues & Horizon (Days 51–55)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D51** | Configure named queues in `config/queue.php` | 7 queues defined | `feat(queue): configure Redis named queues` |
-| **D52** | Install Horizon; auth gate; dashboard at `/horizon` | Horizon UI live | `feat(queue): install and configure Laravel Horizon` |
-| **D53** | Supervisor program blocks per queue with concurrency limits | Workers stable under load | `infra: configure Supervisor workers per queue` |
-| **D54** | Failed job handling, retry backoff, `system_audit_logs` entry | Failures observable | `feat(queue): add failed job retry and audit logging` |
-| **D55** | Queue integration tests (dispatch, process, assert side effects) | Tests green | `test(queue): add job processing integration tests` |
-
----
-
-### Section 3.2 — Product enrichment / scraping (Days 56–60)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D56** | `EnrichProductDataJob` implements `ShouldQueue`; `scraping` queue | Job dispatchable | `feat(scraper): add EnrichProductDataJob` |
-| **D57** | `product:enrich {id}` Artisan command invoked by job | CLI enrichment works | `feat(scraper): implement product:enrich command` |
-| **D58** | Node.js Puppeteer script in `apps/backend/scripts/scraper/` | Script returns image URLs + specs | `feat(scraper): add Puppeteer scraper script` |
-| **D59** | Image download, thumbnail generation, `product_images` insert | Images attached to products | `feat(scraper): download images and generate thumbnails` |
-| **D60** | Mock scraper tests; manual test checklist in docs | Section tested | `test(scraper): add mocked scraper integration tests` |
-
----
-
-### Section 3.3 — Bulk Excel import/export (Days 61–65)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D61** | `PreviewXlsImportAction` — parse upload, validate rows in memory | Preview API returns valid/invalid counts | `feat(import): implement PreviewXlsImportAction` |
-| **D62** | Row-level error DTO: line number, column, message | Detailed error report | `feat(import): add row-level validation error reporting` |
-| **D63** | `ProcessBulkImportJob` — chunked DB writes on `imports` queue | Large files import async | `feat(import): add ProcessBulkImportJob on imports queue` |
-| **D64** | Export job: filtered query → XLS → S3/local storage → signed URL | Export downloadable | `feat(export): add async export job with signed download URL` |
-| **D65** | Fixture XLS files + round-trip test | Import/export verified | `test(import): add XLS import and export round-trip tests` |
-
----
-
-### Section 3.4 — FCM notifications (Days 66–70)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D66** | `user_fcm_tokens` table + register/delete token API | Devices registrable | `feat(notifications): add FCM token registration API` |
-| **D67** | `FcmNotificationDriver` in Infrastructure (implements domain contract) | Push sendable from action | `feat(notifications): implement FCM push driver` |
-| **D68** | Hook notifications: tier upgrade, import done, export ready, enrich done | All events notify | `feat(notifications): send push on tier upgrade and job completion` |
-| **D69** | `notifications` queue + retry on FCM failure | Reliable delivery | `feat(notifications): add notifications queue with retry policy` |
-| **D70** | Mock FCM tests | Tests green | `test(notifications): add FCM dispatch tests with mock driver` |
-
----
-
-### Section 3.5 — API documentation (Days 71–75)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D71** | Install Scribe; Scalar theme; `/docs` route | Docs UI live | `docs(api): install Scribe with Scalar theme` |
-| **D72** | Annotate auth + tenancy endpoints | Auth section complete | `docs(api): annotate authentication and tenancy endpoints` |
-| **D73** | Annotate catalog, stock, pricing endpoints | Core API documented | `docs(api): annotate catalog and pricing endpoints` |
-| **D74** | Export `openapi.yaml` + Postman `collection.json` in CI artifact | Artifacts generated | `docs(api): generate OpenAPI and Postman collection exports` |
-| **D75** | Tag `v0.3.0-phase3`; Phase 3 milestone close | Phase 3 complete | `docs(api): finalize API documentation for Phase 3 release` |
-
----
-
-## 19. Phase 4 — Flutter Client
-
-**Goal:** Cross-platform apps for all roles — catalog, filters, QR stock, Excel preview, push notifications.
-
-**Milestone:** `M4 — Flutter Client`
-
----
-
-### Section 4.1 — Flutter core architecture (Days 76–80)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D76** | `flutter create` in `apps/frontend`; folder structure: `core/`, `features/` | App runs on web + mobile | `feat(flutter): initialize Flutter app with clean architecture structure` |
-| **D77** | Dio client, base URL config, `AuthInterceptor`, error mapping | HTTP layer ready | `feat(flutter): add Dio client with AuthInterceptor` |
-| **D78** | Responsive layout widgets: `MobileLayout`, `TabletLayout`, `DesktopLayout` | Breakpoints work | `feat(flutter): add responsive layout breakpoints` |
-| **D79** | Login BLoC + secure token storage + auto-refresh | Auth flow complete | `feat(flutter): implement login flow with secure token storage` |
-| **D80** | `bloc_test` examples; CI `flutter analyze` + `flutter test` | Flutter CI green | `test(flutter): add bloc_test setup and CI workflow` |
-
----
-
-### Section 4.2 — Admin & customer portals (Days 81–85)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D81** | Root admin: tenant list, create tenant form | Root admin usable | `feat(ui): build root admin tenant management screens` |
-| **D82** | Wholesaler admin: dashboard shell, navigation | Admin shell ready | `feat(ui): build wholesaler admin dashboard shell` |
-| **D83** | Customer portal: home, catalog entry, **turnover progress bar** | Dealer sees tier progress | `feat(ui): build customer portal with turnover progress indicator` |
-| **D84** | Supplier portal: consignment stock list, update qty | Supplier can manage stock | `feat(ui): build supplier portal with stock management` |
-| **D85** | Plasiyer mode: customer selector + order creation | Field sales flow works | `feat(ui): add plasiyer mode for field order creation` |
-
----
-
-### Section 4.3 — Catalog UI & dynamic filters (Days 86–90)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D86** | Product list screen: pagination, search bar, loading/error states | List performant | `feat(ui): build product list with pagination and search` |
-| **D87** | Filter drawer: multi-select chips, range sliders, toggles | Filters match API | `feat(ui): build dynamic filter drawer component` |
-| **D88** | Product detail: JSON specs rendered by group | Specs readable | `feat(ui): build product detail with grouped technical specs` |
-| **D89** | Apparel matrix grid widget for matrix order strategy | Textile ordering UI | `feat(ui): build apparel color-size matrix order grid` |
-| **D90** | Widget tests for list, filter, detail | UI tests green | `test(ui): add widget tests for catalog screens` |
-
----
-
-### Section 4.4 — QR stock module (Days 91–95)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D91** | Integrate `mobile_scanner`; continuous scan UI | Camera scans without closing | `feat(qr): integrate mobile_scanner continuous scan mode` |
-| **D92** | Inbound flow: scan → qty → location → API POST | Stock inbound works | `feat(qr): build inbound stock entry flow` |
-| **D93** | Picking flow: pick list → scan verify → line checkmarks | Picking verified | `feat(qr): build outbound picking verification flow` |
-| **D94** | Transfer flow: scan → target warehouse selector | Transfers work | `feat(qr): build inter-warehouse transfer flow` |
-| **D95** | Integration test: scan mock → API mock → state assert | QR module tested | `test(qr): add QR stock flow integration tests` |
-
----
-
-### Section 4.5 — Bulk Excel UI & final QA (Days 96–100)
-
-| Day | Task | Deliverable | Example commit |
-|-----|------|-------------|----------------|
-| **D96** | Upload screen + preview table (valid/invalid rows, errors) | Import preview UI | `feat(ui): build XLS upload and validation preview screen` |
-| **D97** | Export request screen + polling / push for download link | Export UI works | `feat(ui): build export request and download UI` |
-| **D98** | FCM handler: foreground + background notification routing | Push opens correct screen | `feat(ui): handle push notifications for background jobs` |
-| **D99** | End-to-end smoke checklist: all roles, all critical paths | QA doc signed off | `test(e2e): add end-to-end smoke test checklist` |
-| **D100** | Tag `v1.0.0`; close M4; update README status table | **Project MVP complete** | `docs: mark Phase 4 complete and update project status` |
-
----
-
-## 20. Definition of done (per section)
-
-A section is **done** only when ALL of the following are true:
-
-- [ ] All 5 GitHub issues for the section are closed  
-- [ ] All work merged to `main` via reviewed PR(s)  
-- [ ] Commits follow Conventional Commits (English)  
-- [ ] Pest tests pass; new code has tests where applicable  
-- [ ] PHPStan Level 9 passes (backend sections)  
-- [ ] Flutter analyze + test pass (frontend sections)  
-- [ ] No secrets committed; `.env.example` updated if new env vars  
-- [ ] Scribe docs updated if API changed (Phase 2+)  
-- [ ] README / plan status updated at phase boundaries  
+**Proje tamamlanması:** D20 sonunda `v1.0.0` tag + M4 milestone closed.
 
 ---
 
@@ -748,7 +523,7 @@ Teknik omurga: **Laravel 11 + DDD + Hexagonal** (backend), **Flutter 3 + Clean A
 | Architecture | This file (§1–14) | System design, modules, conventions |
 | Schema | `database-schema.md` | Every column, index, FK |
 | API | `api-contract.md` | Every endpoint, request/response |
-| Operations | `github-roadmap.md` | 100 issues, 4 milestones |
+| Operations | `github-roadmap.md` | 20 issues, 4 milestones |
 | **Daily execution** | `playbooks/phase-{1-4}-detailed.md` | One section per day (D1–D20) |
 
 > **Rule:** When implementing, always follow the **playbook for the current day** first. This file is the architectural reference.

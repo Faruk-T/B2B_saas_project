@@ -122,16 +122,18 @@ Merge  → main'e sadece PR ile
 
 ---
 
-## İlk push
+## İlk push (D1 — main'e değil, branch'e)
 
 ```powershell
 cd "c:\Users\user\Desktop\Trunçgil Commerce OS\b2b-main"
 git init
+git checkout -b phase-1/section-1-planning-and-readme
 git add .
 git commit -m "docs: add 20-day roadmap and professional README with diagrams"
-git branch -M main
 git remote add origin https://github.com/Faruk-T/B2B_saas_project.git
-git push -u origin main
+git push -u origin phase-1/section-1-planning-and-readme
 ```
 
-Then open **Issue #1** (D1) and branch `phase-1/section-1-planning-and-readme` for any final doc tweaks before merging D1 PR.
+GitHub'da PR aç: `phase-1/section-1-planning-and-readme` → `main` → Merge.
+
+> ⚠️ `git branch -M main` ve `git push origin main` **kullanma**.
